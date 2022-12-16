@@ -8,60 +8,35 @@ for(let i = 1; i <= N; i++) {
     let [from, to] = input[i].split(' ');
     cables[Number(from)] = Number(to);
 }
-// 위에서 아래 방향으로 -> 직전 전깃줄보다 위에 묶여있으면 안된다.
-let udCnt = 0;
+
+let connectedCables = [];
+connectedCables.push(0); //index 1부터 사용하기 위한 dummy
+
+for(let i = 1; i <= 500; i++) {
+    if(cables[i] !== 0) {
+        connectedCables.push(cables[i]);
+    }
+}
+let length = connectedCables.length;
+let dp = new Array(length).fill(0);
+// 가장 긴 증가하는 부분 수열을 찾는다.
+dp[1] = 1;
 for(let i = 2; i <= 500; i++) {
-    // 해당 위치에 전깃줄 연결이 안되어있으면 skip
-    if(cables[i] === 0) {
-        continue;
-    }
     for(let j = 1; j < i; j++) {
-        if(cables[j] === 0) {
-            continue;
+        if(connectedCables[i] > connectedCables[j] && dp[j] >= dp[i]) {
+            dp[i] = dp[j] + 1;
         }
-        // 위에 묶여있으면 치워야한다.
-        if(cables[i] < cables[j]) {
-            udCnt++;
-            break;
-        }
+    }
+    if(dp[i] === 0) {
+        dp[i] = 1;
     }
 }
 
-// 아래에서 위 방향으로 -> 직전 전깃줄보다 아래에 묶여있으면 안된다.
-
-let duCnt = 0;
-for(let i = 499; i >= 1; i--) {
-    // 해당 위치에 전깃줄 연결이 안되어있으면 skip
-    if(cables[i] === 0) {
-        continue;
-    }
-    for(let j = 500; j > i; j--) {
-        if(cables[j] === 0) {
-            continue;
-        }
-        // 아래에 묶여있으면 치워야한다.
-        if(cables[i] > cables[j]) {
-            duCnt++;
-            break;
-        }
+let maxi = -1;
+for(let i = 1; i < dp.length; i++) {
+    if(maxi < dp[i]) {
+        maxi = dp[i];
     }
 }
-// 위에서 아래로 갈때 치워야할 전깃줄이 더 적은지
-// 아래에서 위로 갈때 치워야할 전깃줄이 더 적은지 확인한다.
-console.log(Math.min(udCnt, duCnt));
-
-
-// 틀린풀이 결론
-// 위와 같이 겹치지 않으려면 직전보다 더 큰 값을 가져야 한다 라고 생각하였으나
-// 로직을 다시 보니 내가 한 것 은 그리디로 접근을 했었다. 
-// 직전보다 더 큰 값을 갖는 가장 긴 증가하는 부분수열로 연결을 이어나가지 못함.
-
-// 아래의 반례를 찾지못함
-5
-3 4
-1 5
-4 2
-2 3
-5 1
-
-
+// index 0은 제외하기 위해 마지막에 1을 뺸다
+console.log(connectedCables.length - maxi - 1);
